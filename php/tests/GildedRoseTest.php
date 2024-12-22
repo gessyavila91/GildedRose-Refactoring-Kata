@@ -10,8 +10,6 @@ use PHPUnit\Framework\TestCase;
 
 class GildedRoseTest extends TestCase
 {
-    //keywords 'Sulfuras', 'Aged Brie', 'Conjured', 'Backstage passes'
-
     public function testFoo(): void {
          $items = [
             new Item('foo', 0, 0),// Indx 00
@@ -93,4 +91,27 @@ class GildedRoseTest extends TestCase
         //2.5.ii No se degrada en calidad
         $this->assertSame(80, $items[1]->quality);
     }
+    /////
+    public function testProductType(): void {
+        $items = [
+            // REGULAR
+            new Item('+5 Dexterity Vest', 10, 20),
+            // TYPES 'Sulfuras', 'Aged Brie', 'Conjured', 'Backstage passes'
+            new Item('Aged Brie', 2, 0),
+            new Item('Sulfuras, Hand of Ragnaros', -1, 80),
+            new Item('Backstage passes to a TAFKAL80ETC concert', 15, 20),
+            new Item('Conjured Mana Cake', 3, 6),
+        ];
+        $gildedRose = new GildedRose($items);
+        //$items[0]->name = 'foo';
+
+        $this->assertSame('REGULAR',$gildedRose->productType($items[0]));
+        $this->assertSame('AGED BRIE',$gildedRose->productType($items[1]));
+        $this->assertSame('SULFURAS',$gildedRose->productType($items[2]));
+        $this->assertSame('BACKSTAGE PASSES',$gildedRose->productType($items[3]));
+        $this->assertSame('CONJURED',$gildedRose->productType($items[4]));
+
+
+    }
+
 }
