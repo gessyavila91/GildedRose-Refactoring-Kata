@@ -14,89 +14,46 @@ final class GildedRose
     ) {
     }
 
-    public function updateQuality(): void {
+    public function updateQuality(): void
+    {
         foreach ($this->items as $item) {
             $productType = $this->productType($item);
-            //////
-            if ($productType != 'AGED BRIE' and
-                $productType != 'BACKSTAGE PASSES' and
-                $item->quality > 0) {
-
-                $this->decreaseQuality($item);
-            } elseif ($item->quality < 50) {
-                $this->increaseQuality($item);
-                $this->increaseBackstagePassesQuality($item);
-            }
-
-            $this->decreaseSellIn($item);
-
-            if ($item->sellIn < 0) {
-                if ($productType != 'AGED BRIE') {
-                    if ($productType != 'BACKSTAGE PASSES' and
-                        $item->quality > 0) {
-
-                        $this->decreaseQuality($item);
-                    } else {
-                        $item->quality -= $item->quality;
-                    }
-                } elseif ($item->quality < 50) {
-                    $this->increaseQuality($item);
-                }
+            switch ($productType) {
+                case 'SULFURAS':
+                    $this->sulfurasUpdate($item);
+                    break;
+                case 'AGED BRIE':
+                    $this->agedBrieUpdate($item);
+                    break;
+                case 'BACKSTAGE PASSES':
+                    $this->backstagePassesUpdate($item);
+                    break;
+                case 'CONJURED':
+                    $this->conjuredUpdate($item);
+                    break;
+                case 'REGULAR':
+                    $this->regularUpdate($item);
+                    break;
             }
         }
     }
 
-    /**
-     * @param Item $item
-     * @return void
-     */
-    private function increaseQuality(Item $item): void {
-        $item->quality++;
-    }
-    /**
-     * @param Item $item
-     * @return void
-     */
-    public function increaseBackstagePassesQuality(Item $item): void {
+    public function increaseBackstagePassesQuality(Item $item): void
+    {
         $productType = $this->productType($item);
 
         if ($item->sellIn < 11 and $item->quality < 50 and
             $productType === 'BACKSTAGE PASSES') {
-
             $this->increaseQuality($item);
         }
         if ($item->sellIn < 6 and $item->quality < 50 and
             $productType === 'BACKSTAGE PASSES') {
-
             $this->increaseQuality($item);
         }
     }
 
-    /**
-     * @param Item $item
-     * @return void
-     */
-    private function decreaseQuality(Item $item): void {
-        if ($this->productType($item) != 'SULFURAS') {
-            $item->quality--;
-        }
-    }
-
-    /**
-     * @param Item $item
-     * @return void
-     */
-    private function decreaseSellIn(Item $item): void {
-        if ($this->productType($item) != 'SULFURAS') {
-            $item->sellIn--;
-        }
-    }
-
-    /**
-     * @param Item $item
-     * @return string
-     */
-    public function productType(Item $item): string {
+    public function productType(Item $item): string
+    {
         $name = strtoupper($item->name);
 
         if (str_contains($name, 'AGED BRIE')) {
@@ -116,5 +73,71 @@ final class GildedRose
         }
 
         return 'REGULAR';
+    }
+
+    private function increaseQuality(Item $item): void
+    {
+        $item->quality++;
+    }
+
+    private function decreaseQuality(Item $item): void
+    {
+        if ($this->productType($item) !== 'SULFURAS') {
+            $item->quality--;
+        }
+    }
+
+    private function decreaseSellIn(Item $item): void
+    {
+        if ($this->productType($item) !== 'SULFURAS') {
+            $item->sellIn--;
+        }
+    }
+
+    private function sulfurasUpdate(Item $item): void
+    {
+        // yeah dont do nothing 😆
+    }
+
+    private function agedBrieUpdate(Item $item): void
+    {
+        $this->decreaseSellIn($item);
+        $this->increaseQuality($item);
+        if ($item->sellIn < 0 and $item->quality < 50) {
+            $this->increaseQuality($item);
+        }
+    }
+
+    private function backstagePassesUpdate(Item $item): void
+    {
+        $this->decreaseSellIn($item);
+        $this->increaseQuality($item);
+        $this->increaseBackstagePassesQuality($item);
+        if ($item->sellIn < 0) {
+            $item->quality = 0;
+        }
+    }
+
+    private function conjuredUpdate(Item $item): void
+    {
+        $this->decreaseSellIn($item);
+
+        $this->decreaseQuality($item);
+        $this->decreaseQuality($item);
+        if ($item->sellIn < 0) {
+            $this->decreaseQuality($item);
+            $this->decreaseQuality($item);
+        }
+    }
+
+    private function regularUpdate(Item $item): void
+    {
+        $this->decreaseSellIn($item);
+        if ($item->quality > 0) {
+            $this->decreaseQuality($item);
+            if ($item->sellIn < 0) {
+                $this->decreaseQuality($item);
+            }
+        }
     }
 }

@@ -10,34 +10,39 @@ use PHPUnit\Framework\TestCase;
 
 class GildedRoseTest extends TestCase
 {
-    public function testFoo(): void {
-         $items = [
-            new Item('foo', 0, 0),// Indx 00
+    public function testFoo(): void
+    {
+        $items = [
+            new Item('foo', 0, 0),
         ];
+
         $gildedRose = new GildedRose($items);
         $gildedRose->updateQuality();
+
         $this->assertSame('foo', $items[0]->name);
-        $this->assertSame(-1, $items[0]->sellIn);// 1.1
-        $this->assertSame(0, $items[0]->quality);// 2.2 calidad nunca negativa
+        $this->assertSame(-1, $items[0]->sellIn); // 1.1
+        $this->assertSame(0, $items[0]->quality); // 2.2 calidad nunca negativa
     }
 
-    public function testCoreRules(): void {
+    public function testCoreRules(): void
+    {
         $items = [
-            new Item('+5 Dexterity Vest', 0, 20),// Indx 00
-            new Item('+5 Agility Vest', 0, 20),// Indx 01
+            new Item('+5 Agility Vest', 0, 20),
         ];
 
         $gildedRose = new GildedRose($items);
         $gildedRose->updateQuality();
+
         //2.1 Tras la fecha de venta, la calidad se degrada al doble de velocidad.
-        $this->assertSame(18, $items[1]->quality);
+        $this->assertSame(18, $items[0]->quality);
     }
 
-    public function testAgedBrie(): void {
+    public function testAgedBrie(): void
+    {
         $items = [
-            new Item('Aged Brie', 2, 0),// Indx 00
-            new Item('Aged Brie', 0, 0),// Indx 01
-            new Item('Aged Brie', 0, 49),// Indx 02
+            new Item('Aged Brie', 2, 0),
+            new Item('Aged Brie', 0, 0),
+            new Item('Aged Brie', 0, 49),
         ];
 
         $gildedRose = new GildedRose($items);
@@ -51,12 +56,13 @@ class GildedRoseTest extends TestCase
         $this->assertSame(50, $items[2]->quality);
     }
 
-    public function testBackstagePasses(): void {
+    public function testBackstagePasses(): void
+    {
         $items = [
-            new Item('Backstage passes to a TAFKAL80ETC concert', 15, 20),// Indx 00
-            new Item('Backstage passes to a TAFKAL80ETC concert', 10, 40),// Indx 01
-            new Item('Backstage passes to a TAFKAL80ETC concert', 5, 30),// Indx 02
-            new Item('Backstage passes to a TAFKAL80ETC concert', 0, 30),// Indx 03
+            new Item('Backstage passes to a TAFKAL80ETC concert', 15, 20),
+            new Item('Backstage passes to a TAFKAL80ETC concert', 10, 40),
+            new Item('Backstage passes to a TAFKAL80ETC concert', 5, 30),
+            new Item('Backstage passes to a TAFKAL80ETC concert', 0, 30),
         ];
 
         $gildedRose = new GildedRose($items);
@@ -72,46 +78,61 @@ class GildedRoseTest extends TestCase
         $this->assertSame(0, $items[3]->quality);
     }
 
-    public function testSulfuras(): void {
+    public function testSulfuras(): void
+    {
         $items = [
-            new Item('Sulfuras, Hand of Ragnaros', 0, 80),// Indx 00
-            new Item('Sulfuras, Hand of Ragnaros', -1, 80),// Indx 01
+            new Item('Sulfuras, Hand of Ragnaros', 0, 80),
+            new Item('Sulfuras, Hand of Ragnaros', -1, 80),
         ];
 
         $gildedRose = new GildedRose($items);
         $gildedRose->updateQuality();
 
         // Sulfuras es un artículo legendario
-        //2.5.i No tiene fecha de venta
+        //2.5.1 No tiene fecha de venta
         $this->assertSame(0, $items[0]->sellIn);
-        //2.5.ii No se degrada en calidad
+        //2.5.2 No se degrada en calidad
         $this->assertSame(80, $items[0]->quality);
-        //2.5.i No tiene fecha de venta
+        //2.5.1 No tiene fecha de venta
         $this->assertSame(-1, $items[1]->sellIn);
-        //2.5.ii No se degrada en calidad
+        //2.5.2 No se degrada en calidad
         $this->assertSame(80, $items[1]->quality);
     }
-    /////
-    public function testProductType(): void {
+
+    public function testConjured(): void
+    {
         $items = [
-            // REGULAR
+            new Item('Conjured Mana Cake', 3, 6),
+            new Item('Conjured Mana Cake', 0, 6),
+        ];
+
+        $gildedRose = new GildedRose($items);
+        $gildedRose->updateQuality();
+
+        // Sulfuras es un artículo legendario
+        //3.1 Los artículos conjurados (Conjured) degradan su calidad (Quality) el doble de rápido que los artículos normales
+        $this->assertSame(4, $items[0]->quality);
+        $this->assertSame(2, $items[1]->quality);
+    }
+
+    public function testProductType(): void
+    {
+        $items = [
+            // 'REGULAR'
             new Item('+5 Dexterity Vest', 10, 20),
-            // TYPES 'Sulfuras', 'Aged Brie', 'Conjured', 'Backstage passes'
+            // 'SULFURAS', 'AGED BRIE', 'CONJURED', 'BACKSTAGE PASSES'
             new Item('Aged Brie', 2, 0),
             new Item('Sulfuras, Hand of Ragnaros', -1, 80),
             new Item('Backstage passes to a TAFKAL80ETC concert', 15, 20),
             new Item('Conjured Mana Cake', 3, 6),
         ];
+
         $gildedRose = new GildedRose($items);
-        //$items[0]->name = 'foo';
 
-        $this->assertSame('REGULAR',$gildedRose->productType($items[0]));
-        $this->assertSame('AGED BRIE',$gildedRose->productType($items[1]));
-        $this->assertSame('SULFURAS',$gildedRose->productType($items[2]));
-        $this->assertSame('BACKSTAGE PASSES',$gildedRose->productType($items[3]));
-        $this->assertSame('CONJURED',$gildedRose->productType($items[4]));
-
-
+        $this->assertSame('AGED BRIE', $gildedRose->productType($items[1]));
+        $this->assertSame('REGULAR', $gildedRose->productType($items[0]));
+        $this->assertSame('SULFURAS', $gildedRose->productType($items[2]));
+        $this->assertSame('BACKSTAGE PASSES', $gildedRose->productType($items[3]));
+        $this->assertSame('CONJURED', $gildedRose->productType($items[4]));
     }
-
 }
