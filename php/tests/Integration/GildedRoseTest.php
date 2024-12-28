@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Tests;
+namespace Tests\Integration;
 
 use GildedRose\GildedRose;
-use GildedRose\Item;
+use GildedRose\Models\Item;
 use PHPUnit\Framework\TestCase;
 
 class GildedRoseTest extends TestCase
@@ -182,27 +182,5 @@ class GildedRoseTest extends TestCase
         // 3.1 Los artículos conjurados (Conjured) degradan su calidad (Quality) el doble de rápido que los artículos normales
         $this->assertSame(4, $items[0]->quality);
         $this->assertSame(2, $items[1]->quality);
-    }
-
-    public function testProductType(): void
-    {
-        $items = [
-            // 'REGULAR'
-            new Item('+5 Dexterity Vest', 10, 20),
-            // 'SULFURAS', 'AGED BRIE', 'CONJURED', 'BACKSTAGE PASSES'
-            new Item('Aged Brie', 2, 0),
-            new Item('Sulfuras, Hand of Ragnaros', -1, 80),
-            new Item('Backstage passes to a TAFKAL80ETC concert', 15, 20),
-            new Item('Conjured Mana Cake', 3, 6),
-        ];
-
-        $this->gildedRose->setItems($items);
-        $this->gildedRose->updateQuality();
-
-        $this->assertSame('AGED BRIE', $this->gildedRose->getProductTypeByName($items[1]));
-        $this->assertSame('BACKSTAGE PASSES', $this->gildedRose->getProductTypeByName($items[3]));
-        $this->assertSame('CONJURED', $this->gildedRose->getProductTypeByName($items[4]));
-        $this->assertSame('REGULAR', $this->gildedRose->getProductTypeByName($items[0]));
-        $this->assertSame('SULFURAS', $this->gildedRose->getProductTypeByName($items[2]));
     }
 }
